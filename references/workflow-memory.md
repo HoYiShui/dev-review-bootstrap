@@ -75,6 +75,7 @@ Recommended shape:
 Suggested phases:
 
 - `idle`
+- `waiting_user`
 - `ready_for_dev`
 - `ready_for_review`
 - `fixing`
@@ -92,6 +93,7 @@ Suggested phases:
 Recommended event types:
 
 - `bootstrap`
+- `waiting_user`
 - `implementation`
 - `review`
 - `task_advanced`
@@ -121,6 +123,20 @@ The scaffold installs two project-scoped Codex custom agents:
 - `.codex/agents/autodev_reviewer.toml`
 
 The orchestrator should always use these agents for implementation and review. The main session should not directly implement or review. This keeps the role boundary stable across long loops.
+
+## Empty Plan Semantics
+
+Do not treat every empty `plan.yaml` as `done`.
+
+Use simple history to distinguish:
+
+- First startup / missing plan definition
+  Only bootstrap history exists. Ask the user for:
+  - the task list
+  - the acceptance criteria for each task
+  Then write those criteria into `done_when`, set `phase` to `waiting_user`, and stop until the user answers.
+- Real completion
+  Task-execution history exists and no planned tasks remain. Only then set `phase` to `done`.
 
 ## Codex `Stop` Hook
 

@@ -248,6 +248,7 @@ For the full design, see [references/workflow-memory.md](references/workflow-mem
 5. If review accepts, the orchestrator marks the task done and advances the next one in `plan.yaml`.
 6. `state.json` stays small and tells Codex whether the loop should auto-continue.
 7. The loop stops only when the plan is done, paused, or blocked.
+8. If the first orchestrator start sees an empty plan, it should ask for the task list and the per-task acceptance criteria before running anything.
 
 ---
 

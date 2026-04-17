@@ -99,9 +99,9 @@ def build_state(
         "subagents_required": True,
         "dev_agent_name": "autodev_dev",
         "reviewer_agent_name": "autodev_reviewer",
-        "loop_active": has_tasks,
+        "loop_active": True,
         "auto_continue": has_tasks and install_stop_hook,
-        "phase": "ready_for_dev" if has_tasks else "idle",
+        "phase": "ready_for_dev" if has_tasks else "waiting_user",
         "current_task_id": current_task_id,
         "iteration": 0,
         "review_round": 0,
@@ -136,7 +136,7 @@ def build_log(mode: str, task_title: str, task_list: list[str], test_command: st
         task_id = "T1"
     else:
         task_count = 0
-        summary = "Installed autodev scaffold with an empty plan"
+        summary = "Installed autodev scaffold with an empty plan; waiting for the user to provide tasks and per-task acceptance criteria"
         task_id = None
 
     event = {

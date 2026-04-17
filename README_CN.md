@@ -248,6 +248,7 @@ AGENTS.md
 5. 如果 review 接受，orchestrator 把当前任务标记为 done，并推进下一个任务。
 6. `state.json` 维持最小状态，并告诉 Codex 是否应该自动续跑。
 7. 只有当计划完成、暂停，或被外部因素阻塞时，这个 loop 才会停止。
+8. 如果 orchestrator 第一次启动时看到空 plan，它应先向用户追问任务列表，以及每条任务的验收标准，然后再开始运行。
 
 ---
 
