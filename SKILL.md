@@ -33,6 +33,7 @@ Before writing files, ask only the minimum questions needed to make the scaffold
 2. Ask how to seed `plan.yaml`.
 3. Ask whether to install the repo-local Codex `Stop` hook in `.codex/hooks.json`.
 4. Ask for the project test command, or confirm it should stay blank.
+5. If the user seeds real tasks during bootstrap, ask for the acceptance criteria for each task, or confirm you should place provisional criteria into `done_when`.
 
 Use defaults unless the user wants to customize them:
 
@@ -123,6 +124,7 @@ Keep these boundaries explicit when explaining or adjusting the scaffold:
 - `autodev_dev` implements the current task and returns structured JSON
 - `autodev_reviewer` stays read-only and returns `accepted`, `changes_requested`, or `blocked`
 - the hook only keeps the orchestrator alive; it is not the orchestrator
+- if the first orchestrator startup sees an empty plan, it must ask the user for tasks and per-task acceptance criteria instead of marking the loop done
 
 The setup layer should point the runtime layer at:
 
