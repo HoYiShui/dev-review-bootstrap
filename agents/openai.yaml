@@ -1,4 +1,4 @@
 interface:
-  display_name: "Dev Review Bootstrap"
-  short_description: "Install dev-review workflow scaffold"
-  default_prompt: "Use $dev-review-bootstrap to set up the dev-review workflow for this project."
+  display_name: "Autodev Loop Bootstrap"
+  short_description: "Install a Codex-first autodev loop scaffold"
+  default_prompt: "Use $dev-review-bootstrap to install the autodev loop for this project."

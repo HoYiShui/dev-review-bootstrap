@@ -1,7 +1,0 @@
-task_id: __CURRENT_TASK_ID__
-goal: __CURRENT_TASK_GOAL__
-current_constraints:
-  - reviewer must remain read-only
-  - dev must write state/dev_handoff.yaml before ending the turn
-next_step: __CURRENT_NEXT_STEP__
-must_watch: []

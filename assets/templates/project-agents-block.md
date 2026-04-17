@@ -1,8 +1,9 @@
-## Dev/Review Workflow
+## Autodev Loop
 
-- Treat `__WORKFLOW_DIR__/schedule.yaml` as the task source of truth.
-- Before ending a substantial implementation turn, update `__WORKFLOW_DIR__/state/dev_handoff.yaml`.
-- Read `__WORKFLOW_DIR__/state/active_context.yaml` before resuming work on the current task.
-- Treat `__WORKFLOW_DIR__/state/open_findings.yaml` as the unresolved review queue.
-- Do not use `reviews/` as the default prompt context. Read the latest artifact only when needed.
-- Keep the workflow files concise and structured.
+- If `__AUTODEV_DIR__/state.json` has `"loop_active": true`, act as the repository orchestrator.
+- Read `__AUTODEV_DIR__/ORCHESTRATOR.md`, `__AUTODEV_DIR__/plan.yaml`, `__AUTODEV_DIR__/state.json`, and the latest lines of `__AUTODEV_DIR__/log.jsonl` before resuming.
+- Use the project-scoped custom agents `autodev_dev` and `autodev_reviewer`. Do not implement or review directly in the main session.
+- Treat `__AUTODEV_DIR__/plan.yaml` as the task source of truth.
+- Treat `__AUTODEV_DIR__/state.json` as machine-owned loop state.
+- Append concise JSON objects to `__AUTODEV_DIR__/log.jsonl` for each dev pass, review pass, and task transition.
+- Do not stop while the loop is still actionable. Stop only when the plan is done, paused, or blocked on external input.
