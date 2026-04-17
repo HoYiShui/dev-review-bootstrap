@@ -1,6 +1,6 @@
 ---
 name: dev-review-bootstrap
-description: Install a reusable dev-review workflow scaffold into a project. Use when Codex needs to set up a repository so a long-lived dev agent can hand off structured state, a hook-triggered reviewer can run as a short-lived subprocess, and workflow memory lives in project files instead of process context. Trigger when the user asks to "set up dev-review workflow", "bootstrap review infrastructure", "install handoff/reviewer hooks", "initialize workflow memory", or explicitly invokes $dev-review-bootstrap.
+description: Install a reusable dev-review workflow scaffold into a project. Use when Codex needs to set up a repository for a long-lived dev agent, a short-lived reviewer agent, and file-backed workflow memory. The generated scaffold is intended to work with Codex, Claude Code, or similar terminal coding agents, even though this packaged installer is invoked as a Codex skill. Trigger when the user asks to "set up dev-review workflow", "bootstrap review infrastructure", "install handoff/reviewer hooks", "initialize workflow memory", or explicitly invokes $dev-review-bootstrap.
 ---
 
 # Dev Review Bootstrap
