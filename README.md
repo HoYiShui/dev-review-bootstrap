@@ -110,39 +110,6 @@ In Codex, the orchestrator should use the project-scoped custom agents `autodev_
 
 ---
 
-## Example Prompts
-
-### Minimal Setup
-
-```text
-Use $dev-review-bootstrap to install the autodev loop for this repo. Keep defaults and create an empty plan.
-```
-
-### Start With One Task
-
-```text
-Use $dev-review-bootstrap to install the autodev loop and seed the first task as:
-"Implement the README."
-```
-
-### Start With a Task List
-
-```text
-Use $dev-review-bootstrap to install the autodev loop.
-Seed plan.yaml from this task list:
-- Build the bootstrap skill
-- Add README
-- Test hook installation
-```
-
-### Install the Repo-Local Stop Hook
-
-```text
-Use $dev-review-bootstrap to install the autodev loop and wire the repo-local Codex Stop hook.
-```
-
----
-
 ## What the Skill Asks
 
 Before writing files, the skill asks only the minimum questions needed to make the scaffold usable:
@@ -151,6 +118,7 @@ Before writing files, the skill asks only the minimum questions needed to make t
 2. How should `plan.yaml` be seeded?
 3. Should it install the repo-local Codex `Stop` hook in `.codex/hooks.json`?
 4. What test command should the project use, if any?
+5. If you already provide tasks during bootstrap, what are the review acceptance criteria for each task?
 
 Defaults:
 
