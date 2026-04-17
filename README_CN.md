@@ -110,39 +110,6 @@ Continue the autodev loop until plan.yaml is done, paused, or blocked.
 
 ---
 
-## 示例提示词
-
-### 最简安装
-
-```text
-Use $dev-review-bootstrap to install the autodev loop for this repo. Keep defaults and create an empty plan.
-```
-
-### 用一个任务初始化
-
-```text
-Use $dev-review-bootstrap to install the autodev loop and seed the first task as:
-"Implement the README."
-```
-
-### 用任务列表初始化
-
-```text
-Use $dev-review-bootstrap to install the autodev loop.
-Seed plan.yaml from this task list:
-- Build the bootstrap skill
-- Add README
-- Test hook installation
-```
-
-### 安装 repo-local Stop Hook
-
-```text
-Use $dev-review-bootstrap to install the autodev loop and wire the repo-local Codex Stop hook.
-```
-
----
-
 ## 这个 Skill 会先问什么
 
 在写文件之前，这个 skill 只会问最少量、但足够让脚手架可用的问题：
@@ -151,6 +118,7 @@ Use $dev-review-bootstrap to install the autodev loop and wire the repo-local Co
 2. `plan.yaml` 应该如何初始化？
 3. 是否要在 `.codex/hooks.json` 里安装 repo-local Codex `Stop` hook？
 4. 项目的测试命令是什么？如果没有，是否留空？
+5. 如果你在 bootstrap 阶段就提供了任务，每条任务的 review 验收标准是什么？
 
 默认值：
 
