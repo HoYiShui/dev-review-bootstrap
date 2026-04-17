@@ -87,6 +87,15 @@ Ask only the critical bootstrap questions, install the repo-local Stop hook, and
 
 Your agent will ask a few setup questions, then install the scaffold.
 
+If you already know the task list, seed it during bootstrap. This is the smoothest path because the first orchestrator session can start working immediately.
+
+If you intentionally bootstrap with an empty plan, the first orchestrator session should not mark the loop as done. It should stop in `waiting_user`, ask you for:
+
+- the task list
+- the review acceptance criteria for each task
+
+and then write those criteria into each task's `done_when` field before the dev-review loop starts.
+
 ### Step 3: Open A Fresh Orchestrator Session
 
 Best practice is to start the runtime in a new session after bootstrap finishes.
@@ -105,6 +114,14 @@ Act as the repository orchestrator.
 Use the custom subagents autodev_dev and autodev_reviewer.
 Continue the autodev loop until plan.yaml is done, paused, or blocked.
 ```
+
+If `plan.yaml` is empty, the expected first response from the orchestrator is not "done". The expected behavior is:
+
+1. detect that this is first startup or missing plan definition
+2. ask you for the task list
+3. ask you for the review acceptance criteria for each task
+4. wait for your answer
+5. only then begin the subagent loop
 
 In Codex, the orchestrator should use the project-scoped custom agents `autodev_dev` and `autodev_reviewer`. If the repo-local `Stop` hook is installed, that new orchestrator session can continue automatically across turns.
 
@@ -151,6 +168,7 @@ Before writing files, the skill asks only the minimum questions needed to make t
 2. How should `plan.yaml` be seeded?
 3. Should it install the repo-local Codex `Stop` hook in `.codex/hooks.json`?
 4. What test command should the project use, if any?
+5. If you already provide tasks during bootstrap, what are the review acceptance criteria for each task?
 
 Defaults:
 
@@ -161,6 +179,8 @@ Defaults:
 - subagents: `autodev_dev`, `autodev_reviewer`
 
 After installation, the bootstrap agent should also tell you to open a fresh orchestrator session and give you the exact runtime prompt to send there.
+
+If bootstrap is done with an empty plan, the orchestrator session becomes the place where task collection happens. In that case, the orchestrator should ask for the task list and per-task acceptance criteria before it touches the dev-review loop.
 
 ---
 
@@ -249,6 +269,11 @@ For the full design, see [references/workflow-memory.md](references/workflow-mem
 6. `state.json` stays small and tells Codex whether the loop should auto-continue.
 7. The loop stops only when the plan is done, paused, or blocked.
 8. If the first orchestrator start sees an empty plan, it should ask for the task list and the per-task acceptance criteria before running anything.
+
+In other words:
+
+- seeded plan at bootstrap: orchestrator can start working immediately
+- empty plan at bootstrap: orchestrator must first collect tasks and acceptance criteria from the user
 
 ---
 
