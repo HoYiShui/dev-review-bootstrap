@@ -1,9 +1,0 @@
-current_task: __CURRENT_TASK_ID__
-tasks:
-  - id: __CURRENT_TASK_ID__
-    title: __CURRENT_TASK_TITLE__
-    status: __CURRENT_TASK_STATUS__
-    priority: 1
-    exit_criteria:
-      - dev_handoff_written
-      - no_blocking_findings

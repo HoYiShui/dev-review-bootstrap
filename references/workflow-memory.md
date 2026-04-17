@@ -1,128 +1,139 @@
-# Workflow Memory Design
+# Autodev Memory Design
 
-This skill bootstraps a file-backed workflow memory model. The project files are intentionally split by lifetime and responsibility.
+This skill bootstraps a small memory model for an orchestrator-style autodev loop. The files are intentionally split by responsibility:
 
-## Files
+- `plan.yaml`: stable task plan
+- `state.json`: compressed machine-owned runtime state
+- `log.jsonl`: append-only dev/review history
+- `.codex/agents/*.toml`: hard role separation for `dev` and `reviewer`
 
-### `schedule.yaml`
+## `plan.yaml`
 
-- Purpose: task source of truth
-- Writer: user or coordinator
-- Readers: dev, reviewer
-- Keep it small and structured
+- Purpose: authoritative task list
+- Writers: user or orchestrator
+- Readers: orchestrator, dev pass, review pass
+- Keep it human-readable and small
 
-Recommended fields:
+Recommended shape:
 
 ```yaml
-current_task: T1
+version: 1
+current_task_id: T1
 tasks:
   - id: T1
     title: Implement the workflow scaffold
     status: in_progress
     priority: 1
-    exit_criteria:
-      - dev_handoff_written
-      - no_blocking_findings
+    done_when:
+      - implementation complete
+      - reviewer accepts
 ```
 
 Recommended statuses:
 
 - `planned`
 - `in_progress`
-- `in_review`
-- `changes_requested`
 - `blocked`
 - `done`
 
-### `state/active_context.yaml`
+## `state.json`
 
-- Purpose: current compressed state for the next dev turn
-- Writer: hook memory refresh step
-- Readers: dev, reviewer
+- Purpose: machine-owned loop cursor and compressed status
+- Writers: orchestrator, optional Codex `Stop` hook
+- Readers: orchestrator, optional Codex `Stop` hook
+- Keep it stable; avoid deleting keys casually
 
-Recommended fields:
+Recommended shape:
 
-```yaml
-task_id: T1
-goal: Finish the current task safely
-current_constraints:
-  - reviewer must stay read-only
-next_step: Resolve the latest blocking finding
-must_watch:
-  - F1
+```json
+{
+  "version": 1,
+  "subagents_required": true,
+  "dev_agent_name": "autodev_dev",
+  "reviewer_agent_name": "autodev_reviewer",
+  "loop_active": true,
+  "auto_continue": true,
+  "phase": "ready_for_dev",
+  "current_task_id": "T1",
+  "iteration": 0,
+  "review_round": 0,
+  "last_event_id": 3,
+  "last_actor": "reviewer",
+  "last_verdict": "changes_requested",
+  "pending_findings": [
+    {
+      "severity": "high",
+      "title": "Installer does not write .codex/hooks.json",
+      "fix": "Add repo-local hook installation"
+    }
+  ],
+  "blocked_reason": "",
+  "continue_prompt": "Autodev loop is still active. Read the workflow files and continue."
+}
 ```
 
-### `state/dev_handoff.yaml`
+Suggested phases:
 
-- Purpose: one-turn handoff from the dev agent
-- Writer: dev
-- Readers: reviewer, user, hook
+- `idle`
+- `ready_for_dev`
+- `ready_for_review`
+- `fixing`
+- `blocked`
+- `done`
+- `paused`
 
-Recommended fields:
+## `log.jsonl`
 
-```yaml
-turn_id: 20260417T180000
-task_id: T1
-summary: Added the project-local review scripts
-changed_files:
-  - path: .codex/workflow/hooks/run_reviewer.sh
-tests:
-  - name: not_run
-    result: not_run
-assumptions:
-  - hooks are triggered by Stop
-open_questions:
-  - Should the review run on every turn?
-review_focus:
-  - hook recursion
+- Purpose: durable event memory across dev and review passes
+- Writer: orchestrator
+- Readers: orchestrator, user
+- One JSON object per line
+
+Recommended event types:
+
+- `bootstrap`
+- `implementation`
+- `review`
+- `task_advanced`
+- `blocked`
+- `loop_finished`
+
+Example lines:
+
+```json
+{"id":1,"actor":"bootstrap","kind":"bootstrap","task_id":"T1","summary":"Installed autodev scaffold with 3 tasks"}
+{"id":2,"actor":"dev","kind":"implementation","task_id":"T1","summary":"Added repo-local hook installer","changed_files":["scripts/init_workflow.py"],"tests":[{"command":"python3 -m pytest","result":"not_run","notes":"installer-only change"}],"blockers":[],"ready_for_review":true}
+{"id":3,"actor":"reviewer","kind":"review","task_id":"T1","verdict":"changes_requested","summary":"Missing hook target file","findings":[{"severity":"high","title":"stop.py is not written","details":"The hook config is missing.","fix":"Write the hook target into .codex/autodev/hooks/stop.py"}],"missing_tests":[],"blocking_reason":""}
 ```
 
-### `state/open_findings.yaml`
+## Why This Split
 
-- Purpose: unresolved reviewer findings across turns
-- Writer: hook memory refresh step
-- Readers: dev, reviewer
+- `plan.yaml` stays readable and user-editable.
+- `state.json` stays small and machine-friendly for automatic continuation.
+- `log.jsonl` preserves the detailed trail without forcing the orchestrator to parse a huge prose log.
+- `.codex/agents/autodev_dev.toml` and `.codex/agents/autodev_reviewer.toml` provide hard prompt isolation instead of relying on soft role prompts.
 
-Recommended fields:
+## Custom Agents
 
-```yaml
-findings:
-  - id: F1
-    task_id: T1
-    severity: high
-    title: Review hook can recurse without a guard
-    status: open
-    source_turn_id: 20260417T180000
-    evidence: post_stop.sh re-invokes Codex without a recursion guard
-    recommended_action: Add an env guard before spawning review
-```
+The scaffold installs two project-scoped Codex custom agents:
 
-### `reviews/<turn_id>.json`
+- `.codex/agents/autodev_dev.toml`
+- `.codex/agents/autodev_reviewer.toml`
 
-- Purpose: structured review artifact
-- Writer: reviewer subprocess
-- Readers: hook refresh step, user, dev when needed
+The orchestrator should always use these agents for implementation and review. The main session should not directly implement or review. This keeps the role boundary stable across long loops.
 
-The default scaffold uses structured JSON because it is easier to update memory files from a machine-readable artifact than from free-form Markdown.
+## Codex `Stop` Hook
 
-## Hook Responsibility
-
-The scaffolded hook logic intentionally does only three things automatically:
-
-1. detect whether a fresh `dev_handoff.yaml` exists
-2. run a structured reviewer subprocess
-3. refresh `active_context.yaml` and `open_findings.yaml`
-
-It does not try to fully rewrite `schedule.yaml`, because that file is both user-facing and task-authoritative.
-
-## Global Dispatcher Model
-
-The skill can optionally install a user-level `Stop` dispatcher in `~/.codex/hooks.json`.
-
-That dispatcher is safe to keep global because it only forwards into a repository if the repository contains:
+For Codex, the scaffold can install a repo-local `.codex/hooks.json` entry that points at:
 
 ```text
-.codex/workflow/hooks/post_stop.sh
+.codex/autodev/hooks/stop.py
 ```
 
-This avoids hard-coding one repository path into the global hook file.
+That hook should be simple:
+
+1. read `state.json`
+2. if the loop is still active, emit `{"decision":"block","reason":"..."}` to keep the orchestrator running
+3. otherwise do nothing and allow the agent to stop
+
+The hook does not run dev or review itself. It only prevents premature termination while the loop is still actionable.
