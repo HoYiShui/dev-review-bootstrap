@@ -1,0 +1,78 @@
+{
+  "type": "object",
+  "properties": {
+    "task_id": {
+      "type": "string"
+    },
+    "turn_id": {
+      "type": "string"
+    },
+    "verdict": {
+      "type": "string",
+      "enum": [
+        "accepted",
+        "changes_requested",
+        "blocked"
+      ]
+    },
+    "summary": {
+      "type": "string"
+    },
+    "blocking_findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "critical",
+              "high",
+              "medium",
+              "low"
+            ]
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "recommended_action": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "severity",
+          "evidence",
+          "recommended_action"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "open_questions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_step": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "task_id",
+    "turn_id",
+    "verdict",
+    "summary",
+    "blocking_findings",
+    "open_questions",
+    "next_step"
+  ],
+  "additionalProperties": false
+}

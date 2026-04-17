@@ -1,0 +1,10 @@
+turn_id: pending
+task_id: __CURRENT_TASK_ID__
+summary: ""
+changed_files: []
+tests:
+  - name: not_run
+    result: not_run
+assumptions: []
+open_questions: []
+review_focus: []

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dev Review Bootstrap"
+  short_description: "Install dev-review workflow scaffold"
+  default_prompt: "Use $dev-review-bootstrap to set up the dev-review workflow for this project."
